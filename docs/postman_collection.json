@@ -1,0 +1,296 @@
+  {
+  "info": {
+    "name": "College Review System API - Postman Collection",
+    "_postman_id": "a97b4c6e-821f-4bb2-b6cf-203b5168e31a",
+    "description": "Comprehensive Postman collection for the College Review System MERN Stack Backend Assessment. Includes JWT Auth, RBAC, College & Review CRUD, and MongoDB Aggregations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "collegeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Register Student",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vasim Student\",\n  \"email\": \"vasim.student@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"role\": \"student\",\n  \"department\": \"Information Technology\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "2. Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "  pm.collectionVariables.set('adminToken', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@collegereviews.com\",\n  \"password\": \"AdminPass123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "3. Login Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "  pm.collectionVariables.set('studentToken', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student1@collegereviews.com\",\n  \"password\": \"StudentPass123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "4. Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{studentToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Colleges",
+      "item": [
+        {
+          "name": "1. List Colleges (With Aggregated Ratings)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/colleges?page=1&limit=10&sort=rating_desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["colleges"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sort", "value": "rating_desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Search Colleges",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/colleges?search=Bombay",
+              "host": ["{{baseUrl}}"],
+              "path": ["colleges"],
+              "query": [{ "key": "search", "value": "Bombay" }]
+            }
+          }
+        },
+        {
+          "name": "3. Filter Colleges by City / State",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/colleges?city=Mumbai",
+              "host": ["{{baseUrl}}"],
+              "path": ["colleges"],
+              "query": [{ "key": "city", "value": "Mumbai" }]
+            }
+          }
+        },
+        {
+          "name": "4. College Platform Stats Summary (Aggregation)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/colleges/stats/summary", "host": ["{{baseUrl}}"], "path": ["colleges", "stats", "summary"] }
+          }
+        },
+        {
+          "name": "5. Get College By ID (With Rating Breakdown)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/colleges/{{collegeId}}", "host": ["{{baseUrl}}"], "path": ["colleges", "{{collegeId}}"] }
+          }
+        },
+        {
+          "name": "6. Create College (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Delhi Technological University\",\n  \"description\": \"State university in Delhi known for robust engineering and management programs.\",\n  \"location\": {\n    \"city\": \"New Delhi\",\n    \"state\": \"Delhi\",\n    \"country\": \"India\"\n  },\n  \"website\": \"http://dtu.ac.in\",\n  \"establishedYear\": 1941,\n  \"contactEmail\": \"info@dtu.ac.in\",\n  \"coursesOffered\": [\"B.Tech Computer Engineering\", \"B.Tech Software Engineering\", \"MBA\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/colleges", "host": ["{{baseUrl}}"], "path": ["colleges"] }
+          }
+        },
+        {
+          "name": "7. Update College (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description with latest research facilities and accreditations.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/colleges/{{collegeId}}", "host": ["{{baseUrl}}"], "path": ["colleges", "{{collegeId}}"] }
+          }
+        },
+        {
+          "name": "8. Delete College (Admin Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/colleges/{{collegeId}}", "host": ["{{baseUrl}}"], "path": ["colleges", "{{collegeId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "1. Create Review (Student/Teacher)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{studentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"collegeId\": \"{{collegeId}}\",\n  \"rating\": 5,\n  \"title\": \"Phenomenal coding culture and mentorship\",\n  \"comment\": \"The labs, hackathons, and faculty guidance helped me land top-tier tech internships.\",\n  \"courseTaken\": \"B.Tech Computer Science\",\n  \"pros\": [\"Great professors\", \"Top placement stats\"],\n  \"cons\": [\"Rigorous continuous testing\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reviews", "host": ["{{baseUrl}}"], "path": ["reviews"] }
+          }
+        },
+        {
+          "name": "2. List All Reviews (Paginated & Filtered)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reviews?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sortBy", "value": "createdAt" },
+                { "key": "sortOrder", "value": "desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Search Reviews Keyword",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reviews?search=placement",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews"],
+              "query": [{ "key": "search", "value": "placement" }]
+            }
+          }
+        },
+        {
+          "name": "4. Get Review by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/reviews/{{reviewId}}", "host": ["{{baseUrl}}"], "path": ["reviews", "{{reviewId}}"] }
+          }
+        },
+        {
+          "name": "5. Update Review (Author or Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{studentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"title\": \"Updated: Outstanding post-graduation support\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reviews/{{reviewId}}", "host": ["{{baseUrl}}"], "path": ["reviews", "{{reviewId}}"] }
+          }
+        },
+        {
+          "name": "6. Delete Review (Author or Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{studentToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/reviews/{{reviewId}}", "host": ["{{baseUrl}}"], "path": ["reviews", "{{reviewId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

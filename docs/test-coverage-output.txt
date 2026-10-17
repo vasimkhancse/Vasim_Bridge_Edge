@@ -1,0 +1,117 @@
+================================================================================
+COLLEGE REVIEW SYSTEM - JEST INTEGRATION TEST & COVERAGE REPORT
+================================================================================
+
+Test Suites: 4 passed, 4 total
+Tests:       44 passed, 44 total
+Snapshots:   0 total
+Time:        38.15 s
+
+PASS tests/review.test.js
+  Reviews Integration Tests (CRUD, RBAC & Aggregations)
+    POST /api/v1/colleges/:collegeId/reviews (Create Review)
+      √ should allow STUDENT to submit a review and update college average rating (1176 ms)
+      √ should allow TEACHER to submit a review (802 ms)
+      √ should reject duplicate review for the same college by the same user with 409 Conflict (808 ms)
+      √ should reject invalid rating value (e.g. 6) with 422 Unprocessable Entity (660 ms)
+      √ should reject review for non-existent college ID with 404 (691 ms)
+    GET /api/v1/reviews (List, Search & Pagination)
+      √ should list all reviews with pagination metadata (770 ms)
+      √ should filter reviews by college ID (755 ms)
+      √ should filter reviews by specific rating (722 ms)
+      √ should search reviews by text keyword (733 ms)
+    PUT /api/v1/reviews/:id (Update Review & RBAC Ownership)
+      √ should allow author (student1) to update review and recalculate college rating (776 ms)
+      √ should forbid student2 from updating student1 review (403 Forbidden) (705 ms)
+      √ should allow ADMIN to update any review (810 ms)
+    DELETE /api/v1/reviews/:id (Delete Review & RBAC Ownership)
+      √ should forbid student2 from deleting student1 review (403 Forbidden) (741 ms)
+      √ should allow author (student1) to delete own review and recompute college rating to 0 (790 ms)
+      √ should allow ADMIN to delete any review (730 ms)
+
+PASS tests/college.test.js
+  Colleges Integration Tests (CRUD, Aggregation & RBAC)
+    POST /api/v1/colleges (Create College)
+      √ should allow ADMIN to create a new college (844 ms)
+      √ should forbid TEACHER from creating a college (403) (505 ms)
+      √ should forbid STUDENT from creating a college (403) (522 ms)
+      √ should reject unauthenticated request (401) (489 ms)
+      √ should reject duplicate college name with 409 Conflict (538 ms)
+    GET /api/v1/colleges (List with Aggregated Rating & Search)
+      √ should return list of colleges with pagination and aggregated rating metrics (560 ms)
+      √ should filter colleges by search query keyword (588 ms)
+      √ should filter colleges by city (538 ms)
+      √ should filter colleges by state (527 ms)
+    GET /api/v1/colleges/:id (College Details & Rating Breakdown)
+      √ should return college details with rating summary breakdown (566 ms)
+      √ should return 404 for non-existent college ID (531 ms)
+      √ should return 400 for invalid ObjectId format (505 ms)
+    PUT /api/v1/colleges/:id (Update College)
+      √ should allow ADMIN to update college details (639 ms)
+      √ should forbid non-admin from updating college (403) (514 ms)
+    DELETE /api/v1/colleges/:id (Delete College & Cascade Reviews)
+      √ should allow ADMIN to delete college and cascade delete its reviews (587 ms)
+      √ should forbid STUDENT from deleting a college (403) (539 ms)
+    GET /api/v1/colleges/stats/summary (Platform Summary Aggregation)
+      √ should return aggregated platform stats (513 ms)
+
+PASS tests/auth.test.js
+  Auth Integration Tests (POST /api/v1/auth/*, GET /api/v1/auth/me)
+    POST /api/v1/auth/register
+      √ should register a new user successfully and return 201 with JWT token (360 ms)
+      √ should fail with 409 Conflict if email is already registered (254 ms)
+      √ should fail with 422 if required fields are missing or invalid (33 ms)
+    POST /api/v1/auth/login
+      √ should authenticate user and return 200 with JWT token for valid credentials (361 ms)
+      √ should fail with 401 Unauthorized for incorrect password (379 ms)
+      √ should fail with 401 Unauthorized for unregistered email (204 ms)
+    GET /api/v1/auth/me
+      √ should return user profile when authenticated with valid Bearer token (232 ms)
+      √ should fail with 401 when Authorization header is missing (203 ms)
+      √ should fail with 401 when token is invalid or malformed (233 ms)
+    PUT /api/v1/auth/profile
+      √ should update user name and department (240 ms)
+
+PASS tests/aggregation.test.js
+  MongoDB Aggregation Pipeline Tests (Ratings & Review Counts)
+    √ should accurately compute real-time average rating and review counts through sequential reviews (1103 ms)
+    √ should rank colleges by averageRating descending in the aggregation pipeline query (740 ms)
+
+-----------------------|---------|----------|---------|---------|----------------------------------
+File                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                
+-----------------------|---------|----------|---------|---------|----------------------------------
+All files              |   87.68 |    63.67 |   80.76 |   88.69 |                                  
+ src                   |    86.2 |       50 |       0 |    86.2 |                                  
+  app.js               |    86.2 |       50 |       0 |    86.2 | 28,42-43,48                      
+ src/config            |      80 |     87.5 |     100 |      80 |                                  
+  env.js               |      80 |     87.5 |     100 |      80 | 4                                
+ src/constants         |     100 |      100 |     100 |     100 |                                  
+  roles.js             |     100 |      100 |     100 |     100 |                                  
+ src/controllers       |   86.38 |    68.54 |   88.23 |   88.34 |                                  
+  authController.js    |   97.22 |    71.42 |     100 |   97.05 | 60                               
+  collegeController.js |   84.44 |    63.79 |   85.71 |   89.41 | 168-169,199,204,209-211,231,236  
+  reviewController.js  |    83.9 |    73.07 |   83.33 |    83.9 | 18,22,87,138-152,164,169,208,213 
+ src/middlewares       |    78.2 |    53.06 |      80 |   78.94 |                                  
+  auth.js              |   87.09 |       75 |     100 |   87.09 | 27,31,38,51                      
+  errorHandler.js      |   55.55 |    35.71 |      50 |   57.69 | 10,15-16,21-24,29-33,38,42       
+  notFound.js          |      75 |      100 |       0 |      75 | 4                                
+  rateLimiter.js       |     100 |       50 |     100 |     100 | 5                                
+  validate.js          |     100 |      100 |     100 |     100 |                                  
+ src/models            |      96 |     87.5 |    87.5 |   95.91 |                                  
+  College.js           |     100 |      100 |     100 |     100 |                                  
+  Review.js            |      95 |    83.33 |      75 |      95 | 105                              
+  User.js              |   95.65 |      100 |     100 |   95.45 | 73                               
+ src/routes            |   97.77 |      100 |       0 |   97.77 |                                  
+  authRoutes.js        |     100 |      100 |     100 |     100 |                                  
+  collegeRoutes.js     |     100 |      100 |     100 |     100 |                                  
+  index.js             |    90.9 |      100 |       0 |    90.9 | 10                               
+  reviewRoutes.js      |     100 |      100 |     100 |     100 |                                  
+ src/utils             |   87.87 |     37.5 |   85.71 |    87.5 |                                  
+  apiError.js          |   88.88 |    30.76 |    87.5 |   88.88 | 12,43                            
+  apiResponse.js       |   81.81 |    45.45 |      75 |   81.81 | 10,23                            
+  asyncHandler.js      |     100 |      100 |     100 |     100 |                                  
+ src/validations       |     100 |      100 |     100 |     100 |                                  
+  authValidation.js    |     100 |      100 |     100 |     100 |                                  
+  collegeValidation.js |     100 |      100 |     100 |     100 |                                  
+  reviewValidation.js  |     100 |      100 |     100 |     100 |                                  
+-----------------------|---------|----------|---------|---------|----------------------------------
